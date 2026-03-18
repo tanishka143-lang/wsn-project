@@ -69,6 +69,10 @@ if uploaded_file is not None:
 
         st.write(f"📡 Transmissions: {transmissions}")
         st.write(f"💾 Saved: {saved}")
+        total = transmissions + saved
+        reduction = (saved / total) * 100
+
+        st.write(f"📊 Transmission Reduction: {reduction:.2f}%")
 
         # Plot graph
         fig, ax = plt.subplots()
