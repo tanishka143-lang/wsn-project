@@ -54,7 +54,7 @@ if uploaded_file is not None:
         st.write(f"📉 Mean Squared Error: {mse:.4f}")
 
         # 📡 Transmission Reduction Logic
-        threshold = 3.0
+        threshold = 5.0
 
         transmissions = 0
         saved = 0
