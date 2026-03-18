@@ -27,13 +27,14 @@ if uploaded_file is not None:
         # 🔥 FIX 3: Clean data
         data = data[["Time", "Temperature"]]
         data = data.dropna()
-        st.write("Number of rows:", len(data))
+      
 
         # Convert to numeric
         data["Time"] = pd.to_numeric(data["Time"], errors='coerce')
         data["Temperature"] = pd.to_numeric(data["Temperature"], errors='coerce')
 
         data = data.dropna()
+          st.write("Number of rows:", len(data))
 
         st.write("✅ Cleaned Data")
         st.write(data.head())
