@@ -1,63 +1,46 @@
+
+   
+
 import streamlit as st
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 
-st.title("WSN Data Prediction System")
+st.title("📡 WSN Sensor Data Prediction")
 
-if st.button("Run Simulation"):
+# Upload CSV
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
-    time = np.arange(0, 100, 0.5)
-    temperature = 25 + np.sin(time) + np.random.normal(0, 0.5, len(time))
+if uploaded_file is not None:
+    
+    # Read dataset
+    data = pd.read_csv(uploaded_file)
+    
+    st.write("📊 Dataset Preview")
+    st.write(data.head())
 
-    data = pd.DataFrame({
-        'time': time,
-        'temp': temperature
-    })
+    # Extract columns
+    X = data["Time"].values.reshape(-1, 1)
+    y = data["Temperature"].values
 
-    def create_lag(data):
-        df = data.copy()
-        df['lag1'] = df['temp'].shift(1)
-        df['lag2'] = df['temp'].shift(2)
-        df['lag3'] = df['temp'].shift(3)
-        df = df.dropna()
-        return df
-
-    df = create_lag(data)
-
-    X = df[['lag1', 'lag2', 'lag3']]
-    y = df['temp']
-
+    # Train model
     model = LinearRegression()
     model.fit(X, y)
 
-    threshold = 0.8
-    transmissions = 0
-    saved = 0
+    predictions = model.predict(X)
 
-    predictions = []
-    actuals = []
+    # Error calculation
+    mse = mean_squared_error(y, predictions)
+    st.write(f"📉 Mean Squared Error: {mse:.4f}")
 
-    for i in range(3, len(data)):
-        lag_values = pd.DataFrame([data['temp'][i-3:i].values], columns=['lag1','lag2','lag3'])
-        pred = model.predict(lag_values)[0]
-        actual = data['temp'][i]
-
-        if abs(pred - actual) > threshold:
-            transmissions += 1
-        else:
-            saved += 1
-
-        predictions.append(pred)
-        actuals.append(actual)
-
-    st.write("Transmissions:", transmissions)
-    st.write("Saved:", saved)
-
+    # Plot graph
     fig, ax = plt.subplots()
-    ax.plot(actuals, label="Actual")
-    ax.plot(predictions, label="Predicted")
+    ax.plot(X, y, label="Actual Data")
+    ax.plot(X, predictions, label="Predicted Data")
     ax.legend()
 
     st.pyplot(fig)
+
+else:
+    st.info("👆 Please upload a CSV file with Time and Temperature columns")
