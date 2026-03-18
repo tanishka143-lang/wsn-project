@@ -1,6 +1,3 @@
-
-   
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,38 +6,58 @@ from sklearn.metrics import mean_squared_error
 
 st.title("📡 WSN Sensor Data Prediction")
 
-# Upload CSV
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    
-    # Read dataset
+
+    # Read file
     data = pd.read_csv(uploaded_file)
-    
-    st.write("📊 Dataset Preview")
+
+    st.write("📊 Raw Data")
     st.write(data.head())
 
-    # Extract columns
-    X = data["Time"].values.reshape(-1, 1)
-    y = data["Temperature"].values
+    # 🔥 FIX 1: Check columns
+    st.write("Columns in dataset:", data.columns)
 
-    # Train model
-    model = LinearRegression()
-    model.fit(X, y)
+    # 🔥 FIX 2: Ensure correct column names
+    if "Time" not in data.columns or "Temperature" not in data.columns:
+        st.error("❌ CSV must contain 'Time' and 'Temperature' columns")
+    
+    else:
+        # 🔥 FIX 3: Clean data
+        data = data[["Time", "Temperature"]]
+        data = data.dropna()
 
-    predictions = model.predict(X)
+        # Convert to numeric
+        data["Time"] = pd.to_numeric(data["Time"], errors='coerce')
+        data["Temperature"] = pd.to_numeric(data["Temperature"], errors='coerce')
 
-    # Error calculation
-    mse = mean_squared_error(y, predictions)
-    st.write(f"📉 Mean Squared Error: {mse:.4f}")
+        data = data.dropna()
 
-    # Plot graph
-    fig, ax = plt.subplots()
-    ax.plot(X, y, label="Actual Data")
-    ax.plot(X, predictions, label="Predicted Data")
-    ax.legend()
+        st.write("✅ Cleaned Data")
+        st.write(data.head())
 
-    st.pyplot(fig)
+        # 🔥 FIX 4: Extract properly
+        X = data[["Time"]]   # IMPORTANT (double brackets)
+        y = data["Temperature"]
+
+        # 🔥 FIX 5: Train model
+        model = LinearRegression()
+        model.fit(X, y)
+
+        predictions = model.predict(X)
+
+        # Error
+        mse = mean_squared_error(y, predictions)
+        st.write(f"📉 Mean Squared Error: {mse:.4f}")
+
+        # Plot
+        fig, ax = plt.subplots()
+        ax.plot(data["Time"], y, label="Actual")
+        ax.plot(data["Time"], predictions, label="Predicted")
+        ax.legend()
+
+        st.pyplot(fig)
 
 else:
-    st.info("👆 Please upload a CSV file with Time and Temperature columns")
+    st.info("👆 Upload a CSV file with Time and Temperature")
