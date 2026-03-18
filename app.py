@@ -48,6 +48,21 @@ if uploaded_file is not None:
         model.fit(X, y)
 
         predictions = model.predict(X)
+        threshold = 1.0  # you can adjust this
+
+transmissions = 0
+saved = 0
+
+for i in range(len(y)):
+    error = abs(y.iloc[i] - predictions[i])
+    
+    if error > threshold:
+        transmissions += 1
+    else:
+        saved += 1
+
+st.write(f"📡 Transmissions: {transmissions}")
+st.write(f"💾 Saved: {saved}")
 
         # Error
         mse = mean_squared_error(y, predictions)
